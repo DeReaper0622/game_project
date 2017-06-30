@@ -1,0 +1,639 @@
+//Title:Minesweeper game
+//Programmer:Jeffrey Xu George Yang
+//Teacher:Mr.Anandarajan
+//Description:A minesweeper game
+///Date:05/072015
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.PrintWriter;
+import java.io.File;
+import java.io.*;
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Minesweeper extends JFrame implements ActionListener 
+{
+  public static int ROW=16;
+  public static int COL=30;
+  public static int num_of_mine=99;
+  
+  
+  ///////////////////////////////////////////////---------------------Title Page--------------------/////////////////////////////////////////////////
+  JFrame Start_Frame = new JFrame ("Mine Sweeper!");
+  JPanel  game_panel=new JPanel();
+  JPanel pan_1= new JPanel();
+  ImageIcon start = new ImageIcon("smile.jpg");
+  JButton resetbutton = new JButton (start);
+  static JLabel timer_label=new JLabel("0", JLabel.LEFT);
+  
+  
+//The instruciton is given
+  //create buttons for the minefield
+  static JButton field_buttons[][]=new JButton[ROW][COL];
+  
+  
+  //components for the menus
+  JMenuBar bar = new JMenuBar();
+  JMenu game_menu = new JMenu ("Game");
+  JMenu help_menu = new JMenu ("Help");
+  JMenuItem exit_item = new JMenuItem("Exit");
+  JMenuItem beginner_item = new JMenuItem ("Beginner");
+  JMenuItem intermediate_item = new JMenuItem ("Intermediate");
+  JMenuItem advanced_item = new JMenuItem ("Advanced");
+  JMenuItem savegame_item= new JMenuItem ("Save Game");
+  JMenuItem loadgame_item = new JMenuItem ("Load Game");
+  JMenuItem setup_item = new JMenuItem ("Setup/Option");
+  
+  
+  static Timer timer = new Timer();
+  static int interval=1;
+  static boolean start_timing=false;
+  static int mine_number[][]=new int [ROW][COL];
+  int row_value;
+  int col_value;
+  
+  ///////////////////////////////////////////------------------Constructor-----------------///////////////////////
+  
+  public Minesweeper ()throws IOException
+  {
+    ROW=9;
+    COL=9;
+    num_of_mine=10;
+    
+    //initializing all the mine numbers to zero
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        mine_number[i][j]=0;
+        
+      }
+    }
+    
+    //set mnemonics for each menu items
+    game_menu.setMnemonic('g');
+    help_menu.setMnemonic ('h');
+    exit_item.setMnemonic ('e');
+    beginner_item.setMnemonic('b');
+    intermediate_item.setMnemonic('i');
+    advanced_item.setMnemonic('a');
+    savegame_item.setMnemonic ('v');
+    loadgame_item.setMnemonic('l');
+    setup_item.setMnemonic('s');
+    //Declare the layout that is going to be used
+    GridLayout layout1 = new GridLayout (ROW, COL);
+    FlowLayout layout2 = new FlowLayout ();
+    BoxLayout layout8 = new BoxLayout(Start_Frame.getContentPane(),BoxLayout.Y_AXIS);
+    
+    
+    
+    
+    Start_Frame.setSize (415, 500);
+    Start_Frame.setLayout(layout8);
+    pan_1.setLayout(layout2);
+    //set Layout 
+    game_panel.setLayout(layout1);
+    
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        
+        field_buttons[i][j]=new JButton ();
+        field_buttons[i][j].setText(" ");
+        field_buttons[i][j].setActionCommand("fb");
+        
+      }
+    }
+    //add buttons for the game panel
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        
+        field_buttons[i][j].addActionListener(this);
+        game_panel.add(field_buttons[i][j]);
+        
+      }
+    }
+    
+    
+    //add menu and menu items
+    game_menu.add(beginner_item);
+    game_menu.add(intermediate_item);
+    game_menu.add(advanced_item);
+    game_menu.add(savegame_item);
+    game_menu.add(loadgame_item);
+    game_menu.add(exit_item);
+    help_menu.add(setup_item);
+    bar.add(game_menu);
+    bar.add(help_menu);
+    
+    pan_1.add(resetbutton);
+    resetbutton.setActionCommand("reset");
+    resetbutton.addActionListener(this);
+    pan_1.add(timer_label);
+    //labels are created
+    Start_Frame.setJMenuBar(bar);
+    Start_Frame.add(pan_1);
+    Start_Frame.add(game_panel);
+    
+    ///---Actions Listeners--////
+    exit_item.addActionListener(this);
+    beginner_item.addActionListener(this);
+    intermediate_item.addActionListener(this);
+    advanced_item.addActionListener(this);
+    savegame_item.addActionListener(this);
+    loadgame_item.addActionListener(this);
+    setup_item.addActionListener(this);
+    Start_Frame.setVisible (true);
+//    Start_Frame.setResizable (false);
+    
+    ////////////////////////////////////////////////////////////////////
+  }
+  /////////////////////////////////////////////------------------GAME frame----------------/////////////////////////////////////////////////////////
+  
+  
+  
+  
+  public void actionPerformed (ActionEvent event) 
+  {
+    
+    
+    
+    String command = event.getActionCommand (); //find out the name of the component    
+    if (command.equals ("Exit"))
+    {
+      System.out.println ("Exit button is pressed");
+      System.exit (0); //exit the program
+    }
+    else if (command.equals ("Beginner"))
+    {
+      System.out.println ("Beginner button is pressed");
+      ROW=9;
+      COL=9;
+      num_of_mine=10;
+      Start_Frame.setSize (415, 500);
+      set_difficulty(game_panel,ROW,COL);
+      for (int i=0;i<ROW;i++){
+        for (int j =0;j<COL;j++){
+          
+          field_buttons[i][j].addActionListener(this);
+          game_panel.add(field_buttons[i][j]);
+          
+        }
+      }
+    }
+    
+    
+    else if (command.equals ("Intermediate"))
+    {
+      System.out.println ("Intermediate button is pressed");
+      ROW=16;
+      COL=16;
+      num_of_mine=40;
+      Start_Frame.setSize (700, 550);
+      set_difficulty(game_panel,ROW,COL);
+      for (int i=0;i<ROW;i++){
+        for (int j =0;j<COL;j++){
+          
+          field_buttons[i][j].addActionListener(this);
+          game_panel.add(field_buttons[i][j]);
+          
+        }
+      }
+    }
+    else if (command.equals ("Advanced"))
+    {
+      System.out.println ("Advanced button is pressed");
+      ROW=16;
+      COL=30;
+      num_of_mine=99;
+      Start_Frame.setSize (1250, 950);
+      set_difficulty(game_panel,ROW,COL);
+      for (int i=0;i<ROW;i++){
+        for (int j =0;j<COL;j++){
+          
+          field_buttons[i][j].addActionListener(this);
+          game_panel.add(field_buttons[i][j]);
+          
+        }
+      }
+    }
+    else if (command.equals("Save Game")){
+      System.out.println ("save button is pressed");
+     
+      try{
+        WriteToFile(ROW,COL,mine_number,field_buttons);//apply the write to file method
+      }
+      catch(Exception e){ // catch any posiable io expection
+        System.err.println("Error: " + e.getMessage());
+      }
+    }
+    else if (command.equals ("Load Game"))
+    {
+      System.out.println ("Load button is pressed");
+      Start_Frame.setSize (1250, 950);
+      try{
+         ReadFromFile(game_panel,ROW,COL,mine_number,field_buttons);
+      }
+      catch(Exception e){ // catch any posiable io expection
+        System.err.println("Error: " + e.getMessage());
+      }
+      
+      start_timing=true;
+      for (int i=0;i<ROW;i++){
+        for (int j =0;j<COL;j++){
+          field_buttons[i][j].addActionListener(this);
+        }
+      }
+    }
+    else if (command.equals ("Options/Setup"))
+    {
+      System.out.println ("Setup button is pressed");
+      System.exit (0); //exit the program
+    } 
+    else if (command.equals("fb")) {
+      JButton pressed_buttons = (JButton) event.getSource();
+      for (int i=0;i<ROW;i++){
+        for (int j =0;j<COL;j++){
+          if (field_buttons[i][j]==pressed_buttons){
+            row_value=i;
+            col_value=j;
+          }
+        }
+      }
+      
+      if (start_timing==false){
+        timing();
+        start_timing=true;
+        mine_generator(mine_number,row_value,col_value,num_of_mine);
+      }
+      if (mine_number[row_value][col_value]==1)
+      {
+        for (int i=0;i<ROW;i++){
+          for (int j =0;j<COL;j++){
+            if (mine_number[i][j]==1){
+              field_buttons[i][j].setBackground(Color.red);
+            }
+          }
+        }
+        timer.cancel();
+      }
+      
+      mine_checker(field_buttons,mine_number,row_value,col_value);
+     
+    }
+    else if (command.equals("reset")){
+      System.out.println("Reset Button is pressed");
+      timer_label.setText("0");
+      timer.cancel();
+      timer=new Timer();
+      interval=1;
+      if (start_timing==true){
+        start_timing=false;
+      }
+      for(int i =0;i<ROW;i++){
+        for (int j=0;j<COL;j++){
+          field_buttons[i][j].setBackground(null);
+          field_buttons[i][j].setText(" ");
+        }
+      }
+      for (int i=0;i<ROW;i++){
+        for (int j =0;j<COL;j++){
+          mine_number[i][j]=0;
+          
+        }
+      }
+    }
+    
+  }
+  
+  public static void main (String[] args) throws IOException
+  {
+    Minesweeper frame1 = new Minesweeper (); //Start the GUI
+  }
+  //-------------------------------------------------------------------------------------------------
+  public static void timing(){
+    int delay = 1000;
+    int period = 1000;
+    
+    timer.scheduleAtFixedRate(new TimerTask() {
+      
+      public void run() {
+        timer_label.setText(String.valueOf(setInterval()));
+        
+      }
+    }, delay, period);
+    
+  }
+  
+  private static final int setInterval() {
+    
+    return interval++;
+  }
+//==============================================================================================================
+  
+  public static void mine_generator(int[][] mine_num,int x_value,int y_value,int num_mine){
+    
+    int mine_x []= new int[num_mine];
+    int mine_y []= new int[num_mine];
+    for (int i = 0 ; i < num_mine ; i++) //randomize the order of the first five question which have similar difficulty
+    {
+      
+      mine_x [i] = (int) (Math.random () * ROW);
+      mine_y [i] = (int) (Math.random () * COL);
+      for (int p = 0 ; p < i ; p++)
+      {
+        if (mine_x [i] == mine_x [p]&& mine_y[i]== mine_y[p])
+        {
+          
+          mine_x [i] = (int) (Math.random () * ROW);
+          mine_y [i] = (int) (Math.random () * COL);
+          p = -1;
+        }
+        else if (mine_x [i]==x_value&&mine_y[i]==y_value){
+          mine_x [i] = (int) (Math.random () * ROW);
+          mine_y [i] = (int) (Math.random () * COL);
+          p = -1;
+        }
+      }
+    }
+    for (int i=0;i<num_mine;i++){
+      mine_num[mine_x[i]][mine_y[i]]=1;
+    }
+  }
+  
+  
+  public static void mine_checker(JButton [][] field_buttons,int [][] mine_num,int x_value,int y_value){
+    
+    int check_x,check_y;
+    int bes_num=0;
+    
+    String button_text=field_buttons[x_value][y_value].getText();
+    if (mine_num[x_value][y_value]==0&&button_text==(" ")){
+      
+      if (x_value>0&&y_value>0&&x_value<(ROW-1)&&y_value<(COL-1)){
+        check_x= x_value-1;
+        check_y= y_value-1;
+        for (int i=0;i<3;i++){
+          for (int j =0;j<3;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      }
+      
+      else if (x_value==0&&y_value>0&&y_value<(COL-1)){
+        check_x= x_value;
+        check_y= y_value-1;
+        for (int i=0;i<2;i++){
+          for (int j =0;j<3;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      }
+      
+      else if (x_value>0&&y_value==0&&x_value<(ROW-1)){
+        check_x= x_value-1;
+        check_y= y_value;
+        for (int i=0;i<3;i++){
+          for (int j =0;j<2;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      }
+      
+      else if (x_value==0&&y_value==0){
+        check_x= x_value;
+        check_y= y_value;
+        for (int i=0;i<2;i++){
+          for (int j =0;j<2;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      } 
+      
+      else if (x_value==(ROW-1)&&y_value>0&&y_value<(COL-1)){
+        check_x= x_value-1;
+        check_y= y_value-1;
+        for (int i=0;i<2;i++){
+          for (int j =0;j<3;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      }
+      
+      else if (x_value<(ROW-1)&&x_value>0&&y_value==(COL-1)){
+        check_x= x_value-1;
+        check_y= y_value-1;
+        for (int i=0;i<3;i++){
+          for (int j =0;j<2;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      }
+      
+      else if (x_value==(ROW-1)&&y_value==(COL-1)){
+        check_x= x_value-1;
+        check_y= y_value-1;
+        for (int i=0;i<2;i++){
+          for (int j =0;j<2;j++){
+            if (mine_num[check_x+i][check_y+j]==1){
+              bes_num++;
+            }
+          }
+        }
+      }
+      field_buttons[x_value][y_value].setText(String.valueOf(bes_num));  
+      field_buttons[x_value][y_value].setBackground(Color.white);
+      if (bes_num==0){
+        
+        if (x_value>0&&y_value>0&&x_value<(ROW-1)&&y_value<(COL-1)){
+          check_x= x_value-1;
+          check_y= y_value-1;
+          for (int i=0;i<3;i++){
+            for (int j =0;j<3;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        }
+        else if (x_value==0&&y_value>0&&y_value<(COL-1)){
+          check_x= x_value;
+          check_y= y_value-1;
+          for (int i=0;i<2;i++){
+            for (int j =0;j<3;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        }
+        
+        else if (x_value>0&&y_value==0&&x_value<(ROW-1)){
+          check_x= x_value-1;
+          check_y= y_value;
+          for (int i=0;i<3;i++){
+            for (int j =0;j<2;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        }
+        
+        else if (x_value==0&&y_value==0){
+          check_x= x_value;
+          check_y= y_value;
+          for (int i=0;i<2;i++){
+            for (int j =0;j<2;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        } 
+        
+        else if (x_value==(ROW-1)&&y_value>0&&y_value<(COL-1)){
+          check_x= x_value-1;
+          check_y= y_value-1;
+          for (int i=0;i<2;i++){
+            for (int j =0;j<3;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        }
+        
+        else if (x_value<(ROW-1)&&x_value>0&&y_value==(COL-1)){
+          check_x= x_value-1;
+          check_y= y_value-1;
+          for (int i=0;i<3;i++){
+            for (int j =0;j<2;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        }
+        
+        else if (x_value==(ROW-1)&&y_value==(COL-1)){
+          check_x= x_value-1;
+          check_y= y_value-1;
+          for (int i=0;i<2;i++){
+            for (int j =0;j<2;j++){
+              mine_checker(field_buttons,mine_num,(check_x+i),(check_y+j));
+            }
+          }
+        }
+        
+      }
+    } 
+    
+    return;
+  }
+  
+  public static void set_difficulty(JPanel game_panel,int ROW,int COL){
+    
+    game_panel.removeAll(); 
+    game_panel.updateUI();
+    GridLayout layout1 = new GridLayout (ROW, COL);
+    game_panel.setLayout(layout1);
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        mine_number[i][j]=0;
+        
+      }
+    }
+    
+    //add buttons for the game panel
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        
+        field_buttons[i][j]=new JButton ();
+        field_buttons[i][j].setText(" ");
+        field_buttons[i][j].setActionCommand("fb");
+        
+      }
+    }
+  }
+  
+  
+  
+  public static void WriteToFile(int ROW, int COL, int [][] mine_num,JButton[][] field_buttons) throws IOException{
+    String nums[][]= new String[ROW][COL];
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        nums[i][j]=field_buttons[i][j].getText();
+        if (nums[i][j]==" "){
+        nums[i][j]=("9");
+        }
+      }
+    }
+    PrintWriter output = new PrintWriter("record.dat");//write to the same file as entered
+    output.println(String.valueOf(ROW));
+    output.println(String.valueOf(COL));
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        output.println(String.valueOf(mine_number[i][j]));
+      }
+    }
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        output.println(nums[i][j]);
+      }
+    }
+    output.close();
+  }
+  public static void ReadFromFile(JPanel game_panel,int ROW, int COL, int [][] mine_num,JButton [][] field_buttons)throws IOException{
+    File myFile = new File ("record.dat");
+    Scanner input = new Scanner (myFile);
+    ROW=Integer.parseInt(input.nextLine());
+    COL=Integer.parseInt(input.nextLine());
+    int button_nums[][]= new int[ROW][COL];
+    while (input.hasNext())// 
+    {   
+     //Store the Data from the file and display it the the console in a meaningful way
+
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        mine_number[i][j]=Integer.parseInt(input.nextLine());
+      }
+    }
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        button_nums[i][j]=Integer.parseInt(input.nextLine());
+      }
+    }
+    //We have read all the data in the file. Close it.
+  }
+    input.close();
+    game_panel.removeAll(); 
+    game_panel.updateUI();
+    GridLayout layout1 = new GridLayout (ROW, COL);
+    game_panel.setLayout(layout1);
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        
+        field_buttons[i][j]=new JButton ();
+        field_buttons[i][j].setActionCommand("fb");
+         game_panel.add(field_buttons[i][j]);
+      }
+    }
+    for (int i=0;i<ROW;i++){
+      for (int j =0;j<COL;j++){
+        
+        if (button_nums[i][j]!=9){
+           field_buttons[i][j].setBackground(Color.white);
+           field_buttons[i][j].setText(String.valueOf(button_nums[i][j]));
+        }
+        else {
+        field_buttons[i][j].setBackground(null);
+           field_buttons[i][j].setText(" ");
+        }
+      }
+    }
+       
+  }
+}
+
+
+
